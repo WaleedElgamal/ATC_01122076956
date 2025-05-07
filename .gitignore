@@ -1,0 +1,12 @@
+# Root
+node_modules
+.env
+*.log
+
+# Backend
+/backend/target
+/backend/.idea
+
+# Frontend
+/frontend/node_modules
+/frontend/.next
