@@ -1,6 +1,9 @@
 package com.app.event_booking.service;
 
+import com.app.event_booking.dto.EventStatus;
 import com.app.event_booking.model.Event;
+import com.app.event_booking.model.User;
+import com.app.event_booking.repository.BookingRepository;
 import com.app.event_booking.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -9,26 +12,52 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
 public class EventService {
     private final EventRepository eventRepository;
+    private final BookingRepository bookingRepository;
 
-    public Page<Event> getAllEvents(int page, int size) {
+    public Page<EventStatus> getAllEvents(int page, int size, User user) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("date").ascending());
-        return eventRepository.findAll(pageable);
+        Page<Event> eventsPage = eventRepository.findAll(pageable);
+
+        Set<Long> bookedEventIds = bookingRepository.findByUser(user).stream()
+                .map(booking -> booking.getEvent().getId())
+                .collect(Collectors.toSet());
+
+        // Map Event to EventWithBookingStatusDTO
+        return eventsPage.map(event ->
+                new EventStatus(event, bookedEventIds.contains(event.getId()))
+        );
     }
 
-    public Page<Event> getEventsByCategory(String category, int page, int size) {
+    public Page<EventStatus> getEventsByCategory(String category, int page, int size, User user) {
         Pageable pageable = PageRequest.of(page, size);
-        return eventRepository.findByCategory(category, pageable);
+        Page<Event> eventsPage = eventRepository.findByCategory(category, pageable);
+
+        Set<Long> bookedEventIds = bookingRepository.findByUser(user).stream()
+                .map(booking -> booking.getEvent().getId())
+                .collect(Collectors.toSet());
+
+        return eventsPage.map(event -> new EventStatus(event, bookedEventIds.contains(event.getId())));
     }
 
-    public Page<Event> getEventsByTag(String tag, int page, int size) {
+    public Page<EventStatus> getEventsByTag(String tag, int page, int size, User user) {
         Pageable pageable = PageRequest.of(page, size);
-        return eventRepository.findByTagsContaining(tag, pageable);
+        Page<Event> eventsPage = eventRepository.findByTagsContaining(tag, pageable);
+
+        Set<Long> bookedEventIds = bookingRepository.findByUser(user).stream()
+                .map(booking -> booking.getEvent().getId())
+                .collect(Collectors.toSet());
+
+        return eventsPage.map(event -> new EventStatus(event, bookedEventIds.contains(event.getId())));
     }
+
 
     public Event createEvent(Event event) {
         return eventRepository.save(event);

@@ -1,11 +1,17 @@
 package com.app.event_booking.controller;
 
+import com.app.event_booking.dto.EventStatus;
 import com.app.event_booking.model.Event;
+import com.app.event_booking.model.User;
+import com.app.event_booking.repository.EventRepository;
+import com.app.event_booking.repository.UserRepository;
 import com.app.event_booking.service.EventService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -14,33 +20,40 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class EventController {
     private final EventService eventService;
+    private final UserRepository userRepository;
 
     @GetMapping
-    public ResponseEntity<Page<Event>> getAllEvents(
+    public ResponseEntity<Page<EventStatus>> getAllEvents(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        Page<Event> events = eventService.getAllEvents(page, size);
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        Page<EventStatus> events = eventService.getAllEvents(page, size, user);
         return ResponseEntity.ok(events);
     }
 
     @GetMapping("/category")
-    public ResponseEntity<Page<Event>> getEventsByCategory(
+    public ResponseEntity<Page<EventStatus>> getEventsByCategory(
             @RequestParam String category,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        Page<Event> events = eventService.getEventsByCategory(category, page, size);
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        Page<EventStatus> events = eventService.getEventsByCategory(category, page, size, user);
         return ResponseEntity.ok(events);
     }
 
     @GetMapping("/tag")
-    public ResponseEntity<Page<Event>> getEventsByTag(
+    public ResponseEntity<Page<EventStatus>> getEventsByTag(
             @RequestParam String tag,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        Page<Event> events = eventService.getEventsByTag(tag, page, size);
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        Page<EventStatus> events = eventService.getEventsByTag(tag, page, size, user);
         return ResponseEntity.ok(events);
     }
 
