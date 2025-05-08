@@ -6,6 +6,7 @@ node_modules
 # Backend
 /backend/target
 /backend/.idea
+/backend/src/main/resources/application.properties
 
 # Frontend
 /frontend/node_modules
