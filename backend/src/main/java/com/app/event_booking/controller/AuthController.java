@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collections;
 
 @RestController
-@CrossOrigin
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
@@ -30,29 +30,39 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
+        if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email already exists");
         }
 
         User user = User.builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole() != null ? request.getRole() : Role.USER)
+                .firstName(registerRequest.getFirstName())
+                .lastName(registerRequest.getLastName())
+                .email(registerRequest.getEmail())
+                .password(passwordEncoder.encode(registerRequest.getPassword()))
+                .role(registerRequest.getRole() != null ? registerRequest.getRole() : Role.USER)
                 .build();
 
         userRepository.save(user);
-        return ResponseEntity.ok("User registered successfully");
+
+        UserDetails userDetails = userRepository.findByEmail(registerRequest.getEmail())
+                .map(u -> new org.springframework.security.core.userdetails.User(
+                        u.getEmail(), u.getPassword(),
+                        Collections.singleton(new SimpleGrantedAuthority("ROLE_" + u.getRole()))
+                ))
+                .orElseThrow();
+
+        String jwt = jwtUtil.generateToken(userDetails);
+
+        return ResponseEntity.ok(new AuthResponse(jwt));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest authRequest) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+                new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword()));
 
-        UserDetails userDetails = userRepository.findByEmail(request.getEmail())
+        UserDetails userDetails = userRepository.findByEmail(authRequest.getEmail())
                 .map(u -> new org.springframework.security.core.userdetails.User(
                         u.getEmail(), u.getPassword(),
                         Collections.singleton(new SimpleGrantedAuthority("ROLE_" + u.getRole()))
