@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
+@CrossOrigin
 @RequestMapping("/events")
 @RequiredArgsConstructor
 public class EventController {
