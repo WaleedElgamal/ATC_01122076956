@@ -10,7 +10,6 @@ A full-stack web application for browsing, booking, and managing event registrat
 event-booking/
 ├── backend/         # Spring Boot application
 ├── frontend/        # React app (Vite)
-└── docker/          # Docker files (e.g. for PostgreSQL)
 ```
 
 ---
