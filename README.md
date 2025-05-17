@@ -62,8 +62,10 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 spring.jackson.serialization.WRITE_DATES_AS_TIMESTAMPS=false
 spring.main.allow-bean-definition-overriding=true
 
-# CORS for React
-cors.allowed.origins=http://localhost:5173
+# JWT Token
+JWT_SECRET=u8W3hjT+3Jd6WqPmHvy2zLj0sFx81TRuI3+FTt5XlCg=
+JWT_EXPIRATION=3600000
+
 ```
 
 ---
