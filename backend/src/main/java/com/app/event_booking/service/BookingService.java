@@ -22,8 +22,8 @@ public class BookingService {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
 
-    public Booking bookEvent(String userEmail, Long eventId) {
-        User user = userRepository.findByEmail(userEmail)
+    public Booking bookEvent(Long userId, Long eventId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         Event event = eventRepository.findById(eventId)
@@ -41,8 +41,8 @@ public class BookingService {
         return bookingRepository.save(booking);
     }
 
-    public List<Event> getUserBookings(String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
+    public List<Event> getUserBookings(Long userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         return bookingRepository.findByUser(user)

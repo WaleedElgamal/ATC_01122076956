@@ -20,20 +20,20 @@ public class BookingController {
 
     private final BookingService bookingService;
 
-    @PostMapping("/{eventId}")
+    @PostMapping("/{eventId}/{userId}")
     public ResponseEntity<?> bookEvent(@PathVariable Long eventId,
-                                       @AuthenticationPrincipal UserDetails userDetails) {
+                                       @PathVariable Long userId) {
         try {
-            Booking booking = bookingService.bookEvent(userDetails.getUsername(), eventId);
+            Booking booking = bookingService.bookEvent(userId, eventId);
             return ResponseEntity.ok(booking);
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
     }
 
-    @GetMapping("/my-events")
-    public ResponseEntity<List<Event>> getMyBookings(@AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(bookingService.getUserBookings(userDetails.getUsername()));
+    @GetMapping("/my-events/{userId}")
+    public ResponseEntity<List<Event>> getMyBookings(@PathVariable Long userId) {
+        return ResponseEntity.ok(bookingService.getUserBookings(userId));
     }
 }
 
