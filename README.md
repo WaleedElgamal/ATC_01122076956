@@ -72,7 +72,7 @@ JWT_EXPIRATION=3600000
 
 ### Step 3: Run the Backend
 
-In your IDE (VS Code or IntelliJ), or via terminal:
+In your IDE (Preferrably IntelliJ), or via terminal:
 
 ```bash
 cd backend
@@ -81,6 +81,36 @@ cd backend
 
 App runs at: [http://localhost:8080](http://localhost:8080)
 
+### Step 4: Connect to the Database in IntelliJ
+
+Go to Database tool window (usually on the right).
+
+Click the + icon → Data Source → PostgreSQL.
+
+Enter the following:
+
+Host: localhost
+
+Port: 5432
+
+Database: eventdb
+
+User: admin
+
+Password: admin
+
+Click Test Connection, then OK.
+
+### Step 5: Manually Add Admin Account
+
+Since there's no registration for admin, insert an admin user manually from the databsse inspector tool in Intellij by accessing the table users and inserting a new with credentials such as:
+* email: admin@events.com
+* first_name: admin
+* last_name: admin
+* password: $2a$10$u/vf6Bqs1cfrkiWa8i4fwOgGeb/GsMEXUmUHym59Ky8jPHC7q9mUG
+
+* Note 1: unencrypted passowrd = "123456"
+* Note 2: you can replace hashed_password with a real hashed password (e.g. use bcrypt tools or backend password encoder).
 ---
 
 ## 🛠️ Environment Variables (via `.env`)
