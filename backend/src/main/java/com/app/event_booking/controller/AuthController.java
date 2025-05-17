@@ -14,6 +14,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,7 +33,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
         if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email already exists");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Email already exists");
         }
 
         User user = User.builder()
@@ -54,7 +55,7 @@ public class AuthController {
 
         String jwt = jwtUtil.generateToken(userDetails);
 
-        return ResponseEntity.ok(new AuthResponse(jwt));
+        return ResponseEntity.ok(new AuthResponse(jwt, user.getRole()));
     }
 
     @PostMapping("/login")
@@ -62,14 +63,17 @@ public class AuthController {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword()));
 
+        User user = userRepository.findByEmail(authRequest.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("Invalid email or password"));
+
         UserDetails userDetails = userRepository.findByEmail(authRequest.getEmail())
                 .map(u -> new org.springframework.security.core.userdetails.User(
                         u.getEmail(), u.getPassword(),
                         Collections.singleton(new SimpleGrantedAuthority("ROLE_" + u.getRole()))
                 ))
-                .orElseThrow();
+                .orElseThrow(() -> new UsernameNotFoundException("Invalid email or password"));
 
         String token = jwtUtil.generateToken(userDetails);
-        return ResponseEntity.ok(new AuthResponse(token));
+        return ResponseEntity.ok(new AuthResponse(token,user.getRole()));
     }
 }
