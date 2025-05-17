@@ -47,18 +47,6 @@ public class EventService {
         return eventsPage.map(event -> new EventStatus(event, bookedEventIds.contains(event.getId())));
     }
 
-    public Page<EventStatus> getEventsByTag(String tag, int page, int size, User user) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Event> eventsPage = eventRepository.findByTagsContaining(tag, pageable);
-
-        Set<Long> bookedEventIds = bookingRepository.findByUser(user).stream()
-                .map(booking -> booking.getEvent().getId())
-                .collect(Collectors.toSet());
-
-        return eventsPage.map(event -> new EventStatus(event, bookedEventIds.contains(event.getId())));
-    }
-
-
     public Event createEvent(Event event) {
         return eventRepository.save(event);
     }
@@ -74,7 +62,6 @@ public class EventService {
         event.setDate(updatedEvent.getDate());
         event.setPrice(updatedEvent.getPrice());
         event.setImageUrl(updatedEvent.getImageUrl());
-        event.setTags(updatedEvent.getTags());
         return eventRepository.save(event);
     }
 

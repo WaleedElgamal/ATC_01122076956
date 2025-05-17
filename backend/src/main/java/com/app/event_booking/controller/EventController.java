@@ -46,18 +46,6 @@ public class EventController {
         return ResponseEntity.ok(events);
     }
 
-    @GetMapping("/tag")
-    public ResponseEntity<Page<EventStatus>> getEventsByTag(
-            @RequestParam String tag,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @AuthenticationPrincipal UserDetails userDetails
-    ) {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
-        Page<EventStatus> events = eventService.getEventsByTag(tag, page, size, user);
-        return ResponseEntity.ok(events);
-    }
-
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Event> createEvent(@RequestBody Event event) {

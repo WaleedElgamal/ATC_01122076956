@@ -8,5 +8,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
     Page<Event> findByCategory(String category, Pageable pageable);
-    Page<Event> findByTagsContaining(String tag, Pageable pageable);
 }
